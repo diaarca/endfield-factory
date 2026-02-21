@@ -1,0 +1,15 @@
+product,value,time,originium,amethyst,ferrium
+hc_valley_battery,70,10,30,0,20
+buck_capsule_a,70,10,0,0,40
+canned_citrome_a,70,10,0,0,40
+sc_valley_battery,30,10,15,0,10
+buck_capsule_b,27,10,0,0,20
+canned_citrome_b,27,10,0,0,20
+lc_valley_battery,16,10,10,5,0
+buck_capsule_c,10,10,0,10,0
+canned_citrome_c,10,10,0,10,0
+steel_part,3,2,0,0,2
+amethyst_bottle,2,2,0,2,0
+ferrium_part,1,2,0,0,1
+amethyst_part,1,2,0,1,0
+origocrust,1,2,1,0,0
