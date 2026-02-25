@@ -3,7 +3,7 @@
 #include <iostream>
 
 Solver::Solver(const std::vector<Product>& products,
-               const std::map<std::string, double>& mineral_limits,
+               const std::vector<Mineral>& mineral_limits,
                const std::vector<Area>& areas)
     : _products(products), _mineral_limits(mineral_limits), _areas(areas)
 {
@@ -82,11 +82,10 @@ void Solver::declareConstraints()
     objective.end();
 
     // Mineral limits (Ingredients)
-    size_t m_idx = 0;
-    for (const auto& pair : _mineral_limits)
+    for (const auto& mineral : _mineral_limits)
     {
-        const std::string& mineral_name = pair.first;
-        double mineral_limit = pair.second;
+        const std::string& mineral_name = mineral.name;
+        double mineral_limit = mineral.limit;
 
         IloExpr mineral_consumption_expr(_env);
         for (size_t i = 0; i < _products.size(); ++i)
@@ -229,10 +228,10 @@ void Solver::displaySolution()
     }
 
     std::cout << "\n--- Mineral Consumption (usage / limit) ---" << std::endl;
-    for (const auto& pair : _mineral_limits)
+    for (const auto& mineral : _mineral_limits)
     {
-        const std::string& mineral_name = pair.first;
-        double mineral_limit = pair.second;
+        const std::string& mineral_name = mineral.name;
+        double mineral_limit = mineral.limit;
 
         double total_consumed = 0.0;
         for (size_t i = 0; i < _products.size(); ++i)

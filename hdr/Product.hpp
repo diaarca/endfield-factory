@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Mineral.hpp"
 #include <map>
 #include <string>
 #include <vector>
@@ -20,7 +21,7 @@ struct Product
     std::map<std::string, double> factory_facilities;
 
     static std::vector<Product> readCSV(const std::string& filename,
-                                       const std::map<std::string, double>& mineral_limits);
+                                       const std::vector<Mineral>& mineral_limits);
     static void print_table(const std::vector<Product>& products,
-                            const std::map<std::string, double>& mineral_limits);
+                            const std::vector<Mineral>& mineral_limits);
 };

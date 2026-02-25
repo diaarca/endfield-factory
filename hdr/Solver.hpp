@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Area.hpp"
+#include "Mineral.hpp"
 #include "Product.hpp"
 #include <ilcplex/ilocplex.h>
-#include <map>
 #include <string>
 #include <vector>
 
@@ -11,7 +11,7 @@ class Solver
 {
   public:
     Solver(const std::vector<Product>& products,
-           const std::map<std::string, double>& mineral_limits,
+           const std::vector<Mineral>& mineral_limits,
            const std::vector<Area>& areas);
     void solve();
 
@@ -22,7 +22,7 @@ class Solver
     void displaySolution();
 
     const std::vector<Product>& _products;
-    const std::map<std::string, double>& _mineral_limits;
+    const std::vector<Mineral>& _mineral_limits;
     const std::vector<Area>& _areas;
 
     IloEnv _env;

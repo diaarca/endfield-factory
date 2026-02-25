@@ -3,9 +3,9 @@
 #include <iomanip>
 #include <iostream>
 
-std::map<std::string, double> Mineral::readCSV(const std::string& filename)
+std::vector<Mineral> Mineral::readCSV(const std::string& filename)
 {
-    std::map<std::string, double> minerals;
+    std::vector<Mineral> minerals;
     std::ifstream file(filename);
     if (!file.is_open())
     {
@@ -19,13 +19,13 @@ std::map<std::string, double> Mineral::readCSV(const std::string& filename)
         auto row = CSVReader::parse_line(line);
         if (row.size() >= 2)
         {
-            minerals[row[0]] = std::stod(row[1]);
+            minerals.push_back({row[0], std::stod(row[1])});
         }
     }
     return minerals;
 }
 
-void Mineral::print_table(const std::map<std::string, double>& minerals)
+void Mineral::print_table(const std::vector<Mineral>& minerals)
 {
     if (minerals.empty())
         return;
@@ -33,9 +33,9 @@ void Mineral::print_table(const std::map<std::string, double>& minerals)
     std::cout << std::left << std::setw(15) << "Mineral" << " | "
               << std::setw(8) << "Limit" << "\n";
     std::cout << std::string(26, '-') << "\n";
-    for (const auto& pair : minerals)
+    for (const auto& mineral : minerals)
     {
-        std::cout << std::left << std::setw(15) << pair.first << " | "
-                  << std::setw(8) << pair.second << "\n";
+        std::cout << std::left << std::setw(15) << mineral.name << " | "
+                  << std::setw(8) << mineral.limit << "\n";
     }
 }

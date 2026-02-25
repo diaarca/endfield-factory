@@ -1,10 +1,11 @@
 #include "Product.hpp"
+#include <algorithm>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 
 std::vector<Product> Product::readCSV(const std::string& filename,
-                                    const std::map<std::string, double>& mineral_limits)
+                                    const std::vector<Mineral>& mineral_limits)
 {
     std::vector<Product> products;
     std::ifstream file(filename);
@@ -38,7 +39,8 @@ std::vector<Product> Product::readCSV(const std::string& filename,
             width_idx = i;
         else if (header[i] == "height")
             height_idx = i;
-        else if (mineral_limits.count(header[i]))
+        else if (std::any_of(mineral_limits.begin(), mineral_limits.end(),
+                             [&](const Mineral& m) { return m.name == header[i]; }))
         {
             mineral_indices.push_back({header[i], i});
         }
@@ -81,7 +83,7 @@ std::vector<Product> Product::readCSV(const std::string& filename,
 }
 
 void Product::print_table(const std::vector<Product>& products,
-                         const std::map<std::string, double>& mineral_limits)
+                         const std::vector<Mineral>& mineral_limits)
 {
     if (products.empty())
         return;
@@ -101,9 +103,9 @@ void Product::print_table(const std::vector<Product>& products,
     std::cout << std::left << std::setw(10) << "Product" << "|" << std::right
               << std::setw(3) << "Val" << "|" << std::setw(2) << "T" << "|";
 
-    for (const auto& pair : mineral_limits)
+    for (const auto& mineral : mineral_limits)
     {
-        std::string m = pair.first;
+        std::string m = mineral.name;
         if (m.length() > 4)
             m = m.substr(0, 4);
         std::cout << std::setw(4) << m << "|";
@@ -130,11 +132,11 @@ void Product::print_table(const std::vector<Product>& products,
                   << "|" << std::right << std::setw(3) << (int)p.value << "|"
                   << std::setw(2) << (int)p.production_time << "|";
 
-        for (const auto& pair : mineral_limits)
+        for (const auto& mineral : mineral_limits)
         {
             double cons = 0;
-            if (p.mineral_consumption.count(pair.first))
-                cons = p.mineral_consumption.at(pair.first);
+            if (p.mineral_consumption.count(mineral.name))
+                cons = p.mineral_consumption.at(mineral.name);
             std::cout << std::setw(4) << (int)cons << "|";
         }
 
