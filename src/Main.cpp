@@ -1,6 +1,8 @@
 #include "Area.hpp"
 #include "Mineral.hpp"
 #include "Solver.hpp"
+#include "Fuel.hpp"
+#include "Facility.hpp"
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -22,10 +24,14 @@ int main(int argc, char* argv[])
         std::string minerals_file = folder_path + "/minerals.csv";
         std::string products_file = folder_path + "/products.csv";
         std::string areas_file = folder_path + "/areas.csv";
+        std::string fuels_file = folder_path + "/fuels.csv";
+        std::string facilities_file = folder_path + "/facilities.csv";
 
         auto mineral_limits = Mineral::readCSV(minerals_file);
         auto products = Product::readCSV(products_file, mineral_limits);
         auto areas = Area::readCSV(areas_file);
+        auto fuels = Fuel::readCSV(fuels_file);
+        auto facility_power = Facility::readCSV(facilities_file);
 
         if (products.empty() || mineral_limits.empty())
         {
@@ -40,7 +46,7 @@ int main(int argc, char* argv[])
         // Area::print_table(areas);
 
         // Create solver and solve the model
-        Solver solver(products, mineral_limits, areas);
+        Solver solver(products, mineral_limits, areas, fuels, facility_power);
         solver.solve();
     }
     catch (const std::exception& e)

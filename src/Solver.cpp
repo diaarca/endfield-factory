@@ -4,8 +4,11 @@
 
 Solver::Solver(const std::vector<Product>& products,
                const std::vector<Mineral>& mineral_limits,
-               const std::vector<Area>& areas)
-    : _products(products), _mineral_limits(mineral_limits), _areas(areas)
+               const std::vector<Area>& areas,
+               const std::vector<Fuel>& fuels,
+               const std::map<std::string, double>& facility_power)
+    : _products(products), _mineral_limits(mineral_limits), _areas(areas),
+      _fuels(fuels), _facility_power(facility_power)
 {
 }
 
@@ -158,6 +161,66 @@ void Solver::declareConstraints()
         area_space_used.end();
         area_depot_used.end();
     }
+
+    // Power consumption constraints
+    IloExpr power_demand(_env);
+    // 1. Ziplines and defenses of all areas
+    for (const auto& area : _areas)
+    {
+        if (area.area_facilities.count("zipline") &&
+            _facility_power.count("zipline"))
+        {
+            power_demand +=
+                area.area_facilities.at("zipline") * _facility_power.at("zipline");
+        }
+        if (area.area_facilities.count("defense") &&
+            _facility_power.count("defense"))
+        {
+            power_demand +=
+                area.area_facilities.at("defense") * _facility_power.at("defense");
+        }
+    }
+
+    // 2. Used facilities for the factories
+    for (size_t i = 0; i < _products.size(); ++i)
+    {
+        double factory_power = 0;
+        for (const auto& f : _products[i].factory_facilities)
+        {
+            if (_facility_power.count(f.first))
+            {
+                factory_power += f.second * _facility_power.at(f.first);
+            }
+        }
+        if (factory_power > 0)
+        {
+            for (size_t j = 0; j < _areas.size(); ++j)
+            {
+                power_demand += _factories_in_area[i][j] * factory_power;
+            }
+        }
+    }
+
+    // Power provided by batteries
+    IloExpr power_supply(_env);
+    for (const auto& fuel : _fuels)
+    {
+        for (size_t i = 0; i < _products.size(); ++i)
+        {
+            if (_products[i].name == fuel.name)
+            {
+                double power_per_unit_per_min =
+                    (fuel.power * fuel.duration) / 60.0;
+                power_supply += _qty_produced[i] * power_per_unit_per_min;
+                break;
+            }
+        }
+    }
+
+    _model.add(power_supply >= power_demand);
+
+    power_demand.end();
+    power_supply.end();
 }
 
 bool Solver::solveModel()
@@ -245,5 +308,91 @@ void Solver::displaySolution()
         }
         std::cout << mineral_name << ": " << total_consumed << " / "
                   << mineral_limit << std::endl;
+    }
+
+    std::cout << "\n--- Power Consumption ---" << std::endl;
+    double power_ziplines = 0;
+    double power_defenses = 0;
+    for (const auto& area : _areas)
+    {
+        if (area.area_facilities.count("zipline") &&
+            _facility_power.count("zipline"))
+        {
+            power_ziplines += area.area_facilities.at("zipline") *
+                              _facility_power.at("zipline");
+        }
+        if (area.area_facilities.count("defense") &&
+            _facility_power.count("defense"))
+        {
+            power_defenses += area.area_facilities.at("defense") *
+                              _facility_power.at("defense");
+        }
+    }
+
+    double power_factories = 0;
+    for (size_t i = 0; i < _products.size(); ++i)
+    {
+        double factory_power = 0;
+        for (const auto& f : _products[i].factory_facilities)
+        {
+            if (_facility_power.count(f.first))
+            {
+                factory_power += f.second * _facility_power.at(f.first);
+            }
+        }
+        if (factory_power > 0)
+        {
+            for (size_t j = 0; j < _areas.size(); ++j)
+            {
+                power_factories +=
+                    _cplex.getValue(_factories_in_area[i][j]) * factory_power;
+            }
+        }
+    }
+
+    std::cout << "Power for Ziplines: " << power_ziplines << std::endl;
+    std::cout << "Power for Defenses: " << power_defenses << std::endl;
+    std::cout << "Power for Factories: " << power_factories << std::endl;
+    double total_needed = power_ziplines + power_defenses + power_factories;
+    std::cout << "Total Power Needed: " << total_needed << std::endl;
+
+    std::cout << "\n--- Power Production (from batteries) ---" << std::endl;
+    double total_supply = 0;
+    for (const auto& fuel : _fuels)
+    {
+        for (size_t i = 0; i < _products.size(); ++i)
+        {
+            if (_products[i].name == fuel.name)
+            {
+                double qty = _cplex.getValue(_qty_produced[i]);
+                if (qty > 1e-6)
+                {
+                    double power_per_unit_per_min =
+                        (fuel.power * fuel.duration) / 60.0;
+                    double supply = qty * power_per_unit_per_min;
+                    std::cout << fuel.name << ": " << qty << " units/min ("
+                              << supply << " avg power)" << std::endl;
+                    total_supply += supply;
+                }
+                break;
+            }
+        }
+    }
+    std::cout << "Total Power Provided: " << total_supply << std::endl;
+    std::cout << "Battery/min needed for region: " << std::endl;
+    for (const auto& fuel : _fuels)
+    {
+        for (size_t i = 0; i < _products.size(); ++i)
+        {
+            if (_products[i].name == fuel.name)
+            {
+                double power_per_unit_per_min =
+                    (fuel.power * fuel.duration) / 60.0;
+                double needed_qty = total_needed / power_per_unit_per_min;
+                std::cout << "  - if only " << fuel.name << ": " << needed_qty
+                          << " batteries/min" << std::endl;
+                break;
+            }
+        }
     }
 }
