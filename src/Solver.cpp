@@ -175,14 +175,23 @@ void Solver::declareConstraints()
     for (size_t j = 0; j < _areas.size(); ++j)
     {
         IloExpr area_space_used(_env);
-        IloExpr area_depot_used(_env);
+        IloExpr area_depot_1d_used(_env);
+        IloExpr area_depot_2d_used(_env);
         for (size_t i = 0; i < _products.size(); ++i)
         {
             double factory_area =
                 _products[i].factory_width * _products[i].factory_height;
             area_space_used += _factories_in_area[i][j] * factory_area;
-            area_depot_used +=
+
+            // 1D depot usage: sum of depot widths
+            area_depot_1d_used +=
                 _factories_in_area[i][j] * _products[i].factory_depot;
+
+            // 2D depot usage: sum of depot areas
+            // Assume the depot part of the factory is factory_depot * factory_height
+            double factory_depot_area =
+                _products[i].factory_depot * _products[i].factory_height;
+            area_depot_2d_used += _factories_in_area[i][j] * factory_depot_area;
         }
 
         double total_available_area =
@@ -199,17 +208,27 @@ void Solver::declareConstraints()
             }
         }
 
-        if (_areas[j].pac_depot > 0)
+        if (_areas[j].pac_depot_height > 0)
         {
-            _model.add(area_depot_used <= _areas[j].pac_depot);
+            // 2D Depot Constraint
+            double total_depot_area =
+                _areas[j].pac_depot_width * _areas[j].pac_height;
+            // Actually, if it's both in height and width, it might be pac_depot_width * pac_depot_height
+            if (_areas[j].pac_depot_height > 0)
+                total_depot_area =
+                    _areas[j].pac_depot_width * _areas[j].pac_depot_height;
+
+            _model.add(area_depot_2d_used <= total_depot_area);
         }
-        else
+        else if (_areas[j].pac_depot_width > 0)
         {
-            _model.add(area_depot_used == 0);
+            // 1D Depot Constraint
+            _model.add(area_depot_1d_used <= _areas[j].pac_depot_width);
         }
 
         area_space_used.end();
-        area_depot_used.end();
+        area_depot_1d_used.end();
+        area_depot_2d_used.end();
     }
 
     // Power consumption constraints
@@ -310,7 +329,8 @@ void Solver::displaySolution()
         {
             std::cout << "Area: " << _areas[j].name << std::endl;
             double used_space = 0;
-            double used_depot = 0;
+            double used_depot_1d = 0;
+            double used_depot_2d = 0;
             for (size_t i = 0; i < _products.size(); ++i)
             {
                 double num_f = _cplex.getValue(_factories_in_area[i][j]);
@@ -321,14 +341,26 @@ void Solver::displaySolution()
                               << std::endl;
                     used_space += num_f * (_products[i].factory_width *
                                            _products[i].factory_height);
-                    used_depot += num_f * _products[i].factory_depot;
+                    used_depot_1d += num_f * _products[i].factory_depot;
+                    used_depot_2d += num_f * (_products[i].factory_depot *
+                                              _products[i].factory_height);
                 }
             }
             double total_area = _areas[j].pac_width * _areas[j].pac_height;
             std::cout << "  Space used: " << used_space << " / " << total_area
                       << std::endl;
-            std::cout << "  Depot used: " << used_depot << " / "
-                      << _areas[j].pac_depot << std::endl;
+            if (_areas[j].pac_depot_height > 0)
+            {
+                double total_depot_area =
+                    _areas[j].pac_depot_width * _areas[j].pac_depot_height;
+                std::cout << "  Depot (2D) area used: " << used_depot_2d << " / "
+                          << total_depot_area << std::endl;
+            }
+            else
+            {
+                std::cout << "  Depot (1D) length used: " << used_depot_1d
+                          << " / " << _areas[j].pac_depot_width << std::endl;
+            }
         }
     }
 
