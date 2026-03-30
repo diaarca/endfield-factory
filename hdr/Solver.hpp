@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 
+using namespace operations_research;
+
 class Solver
 {
   public:
@@ -34,8 +36,8 @@ class Solver
     const std::map<std::string, double>& _facility_power;
     const Region& _region;
 
-    std::unique_ptr<operations_research::MPSolver> _solver;
-    std::vector<operations_research::MPVariable*> _qty_produced;
-    std::vector<std::vector<operations_research::MPVariable*>> _factories_in_area;
-    std::vector<operations_research::MPVariable*> _num_batteries_active;
+    std::unique_ptr<MPSolver> _solver;
+    std::vector<MPVariable*> _qty_produced;
+    std::vector<std::vector<MPVariable*>> _factories_in_area;
+    std::vector<MPVariable*> _num_batteries_active;
 };

@@ -1,6 +1,6 @@
 CXX = clang++
 
-ORTOOLS_DIR = $(HOME)/OR-TOOLS/or-tools_arm64_macOS-15.3.1_cpp_v9.12.4544
+# ORTOOLS_DIR ?= $(HOME)/OR-TOOLS/or-tools_arm64_macOS-15.3.1_cpp_v9.12.4544
 
 SRC_DIR = src
 HDR_DIR = hdr
@@ -11,8 +11,11 @@ TARGET = $(BIN_DIR)/aic_planner
 SRCS = $(wildcard src/*.cpp)
 OBJS = $(SRCS:src/%.cpp=$(OBJ_DIR)/%.o)
 
-CXXFLAGS = -I$(ORTOOLS_DIR)/include -I$(HDR_DIR) -std=c++17 -O3 -DOR_PROTO_DLL=
-LDFLAGS = -L$(ORTOOLS_DIR)/lib -Wl,-rpath,$(ORTOOLS_DIR)/lib
+CXXFLAGS = -I$(HDR_DIR) -std=c++17 -O3 -DOR_PROTO_DLL=
+ifneq ($(ORTOOLS_DIR),)
+CXXFLAGS += -I$(ORTOOLS_DIR)/include
+LDFLAGS += -L$(ORTOOLS_DIR)/lib -Wl,-rpath,$(ORTOOLS_DIR)/lib
+endif
 LDLIBS = -lortools
 
 .PHONY: all clean
