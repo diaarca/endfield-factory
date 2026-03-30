@@ -97,34 +97,31 @@ void Solver::declareConstraints()
                 objective->GetCoefficient(_num_batteries_active[fuel_idx]) -
                     _products[i].value * fuel_consumption_per_min_coeff);
 
-            // Non-negative sold quantity: _qty_produced[i] - coeff *
-            // _num_batteries_active[fuel_idx] >= 0
-            MPConstraint* const c = _solver->MakeRowConstraint(0, infinity);
-            c->SetCoefficient(_qty_produced[i], 1.0);
-            c->SetCoefficient(_num_batteries_active[fuel_idx],
-                              -fuel_consumption_per_min_coeff);
+            MPConstraint* const c_fuel_cons =
+                _solver->MakeRowConstraint(0, infinity);
+
+            c_fuel_cons->SetCoefficient(_qty_produced[i], 1.0);
+            c_fuel_cons->SetCoefficient(_num_batteries_active[fuel_idx],
+                                        -fuel_consumption_per_min_coeff);
         }
     }
 
-    // Storage constraint: total net production rate must not fill storage in
-    // less than 48 hours
-    if (_region.storage > 0)
+    // the product storage must not be full within 48 hours
+    for (size_t i = 0; i < _products.size(); ++i)
     {
         MPConstraint* const c_storage = _solver->MakeRowConstraint(
-            -infinity, _region.storage / (24.0 * 60.0));
-        for (size_t i = 0; i < _products.size(); ++i)
+            -infinity, _region.storage / (48.0 * 60.0));
+
+        c_storage->SetCoefficient(_qty_produced[i], 1.0);
+        if (fuel_map.count(_products[i].name))
         {
-            c_storage->SetCoefficient(_qty_produced[i], 1.0);
-            if (fuel_map.count(_products[i].name))
-            {
-                size_t fuel_idx = fuel_map.at(_products[i].name);
-                double fuel_consumption_per_min_coeff =
-                    (60.0 / _fuels[fuel_idx].duration);
-                c_storage->SetCoefficient(
-                    _num_batteries_active[fuel_idx],
-                    c_storage->GetCoefficient(_num_batteries_active[fuel_idx]) -
-                        fuel_consumption_per_min_coeff);
-            }
+            size_t fuel_idx = fuel_map.at(_products[i].name);
+            double fuel_consumption_per_min_coeff =
+                (60.0 / _fuels[fuel_idx].duration);
+            c_storage->SetCoefficient(
+                _num_batteries_active[fuel_idx],
+                c_storage->GetCoefficient(_num_batteries_active[fuel_idx]) -
+                    fuel_consumption_per_min_coeff);
         }
     }
 

@@ -31,7 +31,7 @@ Valley IV for now).
 - $d_p$: the depot length needed for the product $p$'s factory
 - $w_p$: the width length needed for the product $p$'s factory
 - $h_p$: the height length needed for the product $p$'s factory
-$- ps_p$: the number of protocol stash needed for the product $p$'s factory
+- $ps_p$: the number of protocol stash needed for the product $p$'s factory
 - $ru_p$: the number of refining unit needed for the product $p$'s factory
 - $su_p$: the number of shredding unit needed for the product $p$'s factory
 - $mu_p$: the number of moulding unit needed for the product $p$'s factory
@@ -73,14 +73,19 @@ $- ps_p$: the number of protocol stash needed for the product $p$'s factory
 ### Variables
 
 - $\text{produce}_p$: the quantity of product $p$ to be produced (per minute)
-- $\text{factory}_p^a$: the number of factory for product $p$ to be place in area $a$
-- $\text{active}_fu$: the quantity of fuel $fu$ that must be active for providing power
+- $\text{factory}_p^a$: the number of factory for product $p$ to be place in
+  area $a$
+- $\text{active}_fu$: the quantity of fuel $fu$ that must be active for
+  providing power
 
 ### Objective
 
-- $\max{\sum_{p\in P_r}(\text{produce}_p . v_p) - \sum_{fu\in FU_r}(\text{active}_fu . \frac{60}{d_{fu}} . v_fu)}$
+$$\max{\left[\sum_{p\in P_r} \left(produce_p . v_p\right) - \sum_{fu\in FU_r} \left(active_{fu} . \dfrac{60}{d_{fu}} . v_{fu}\right) \right]}$$
 
 ### Constraints
 
-- $\text{produce}_{fu} - \frac{60}{d_{fu}} . \text{active}_{fu} \geq 0$
-
+- $$produce_{fu} - \dfrac{60}{d_{fu}} . active_{fu} \geq 0 \quad \forall fu\in FU_r$$
+  (cannot consume more fuel that produced)
+- $$produce_{p} \leq \dfrac{s_r}{48 * 60} \forall p\in P_r\setminus FU_r$$ (we
+  don't want to fill the region storage within 48 hours)
+- $$$$
