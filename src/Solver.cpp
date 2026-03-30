@@ -131,43 +131,35 @@ void Solver::declareConstraints()
         const std::string& mineral_name = _mineral_limits[m].name;
         double mineral_limit = _mineral_limits[m].limit;
 
-        MPConstraint* const c =
+        MPConstraint* const c_mineral =
             _solver->MakeRowConstraint(-infinity, mineral_limit, mineral_name);
 
         for (size_t i = 0; i < _products.size(); ++i)
         {
             if (_products[i].mineral_consumption.count(mineral_name))
             {
-                c->SetCoefficient(
+                c_mineral->SetCoefficient(
                     _qty_produced[i],
                     _products[i].mineral_consumption.at(mineral_name));
             }
-        }
-        if (fuel_map.count(mineral_name))
-        {
-            size_t fuel_idx = fuel_map.at(mineral_name);
-            double fuel_consumption_per_min_coeff =
-                (60.0 / _fuels[fuel_idx].duration);
-            c->SetCoefficient(
-                _num_batteries_active[fuel_idx],
-                c->GetCoefficient(_num_batteries_active[fuel_idx]) +
-                    fuel_consumption_per_min_coeff);
         }
     }
 
     // Factory capacity
     for (size_t i = 0; i < _products.size(); ++i)
     {
-        MPConstraint* const c = _solver->MakeRowConstraint(-infinity, 0);
-        c->SetCoefficient(_qty_produced[i], 1.0);
+        MPConstraint* const c_nb_factory =
+            _solver->MakeRowConstraint(-infinity, 0);
+        c_nb_factory->SetCoefficient(_qty_produced[i], 1.0);
         for (size_t j = 0; j < _areas.size(); ++j)
         {
             double units_per_minute = 60.0 / _products[i].production_time;
-            c->SetCoefficient(_factories_in_area[i][j], -units_per_minute);
+            c_nb_factory->SetCoefficient(_factories_in_area[i][j],
+                                         -units_per_minute);
         }
     }
 
-    // Area space and depot constraints - matching CPLEX logic more precisely
+    // Area space and depot constraints
     for (size_t j = 0; j < _areas.size(); ++j)
     {
         double total_available_area =
@@ -185,65 +177,21 @@ void Solver::declareConstraints()
             }
 
             // Depot constraint
-            if (_areas[j].pac_depot_height > 0)
-            {
-                // Matches the logic in CPLEX: width * height, overwritten by
-                // width * depot_height
-                double total_depot_area =
-                    _areas[j].pac_depot_width * _areas[j].pac_depot_height;
-                MPConstraint* const c_depot_2d =
-                    _solver->MakeRowConstraint(-infinity, total_depot_area);
-                for (size_t i = 0; i < _products.size(); ++i)
-                {
-                    double factory_depot_area = _products[i].factory_depot *
-                                                _products[i].factory_height;
-                    c_depot_2d->SetCoefficient(_factories_in_area[i][j],
-                                               factory_depot_area);
-                }
-            }
-            else if (_areas[j].pac_depot_width > 0)
-            {
-                // This is the case where CPLEX logic would result in
-                // area_depot_2d_used <= pac_depot_width * pac_height BUT, in
-                // CPLEX source, it says: else if (_areas[j].pac_depot_width >
-                // 0) { _model.add(area_depot_1d_used <=
-                // _areas[j].pac_depot_width); } Wait, if depot_height is 0, it
-                // uses 1D constraint. Re-reading CPLEX source:
-                /*
-                if (_areas[j].pac_depot_height > 0) {
-                    double total_depot_area = _areas[j].pac_depot_width *
-                _areas[j].pac_height; if (_areas[j].pac_depot_height > 0)
-                total_depot_area = _areas[j].pac_depot_width *
-                _areas[j].pac_depot_height; _model.add(area_depot_2d_used <=
-                total_depot_area); } else if (_areas[j].pac_depot_width > 0) {
-                    _model.add(area_depot_1d_used <= _areas[j].pac_depot_width);
-                }
-                */
-                // Wait, if depot_height is 0, it skips the 2D check and does 1D
-                // check. In my OR-Tools output for hub: "Depot (2D) area used:
-                // 2067 / 4900" This output comes from displaySolution which had
-                // its own logic! Let's re-align declareConstraints to CPLEX
-                // exactly.
-
-                MPConstraint* const c_depot_1d = _solver->MakeRowConstraint(
-                    -infinity, _areas[j].pac_depot_width);
-                for (size_t i = 0; i < _products.size(); ++i)
-                {
-                    c_depot_1d->SetCoefficient(_factories_in_area[i][j],
-                                               _products[i].factory_depot);
-                }
-            }
-        }
-        else
-        {
+            double total_depot_in_area =
+                _areas[j].pac_depot_width + _areas[j].pac_depot_height;
+            MPConstraint* const c_depot =
+                _solver->MakeRowConstraint(-infinity, total_depot_in_area);
             for (size_t i = 0; i < _products.size(); ++i)
-                _solver->MakeRowConstraint(0, 0)->SetCoefficient(
-                    _factories_in_area[i][j], 1.0);
+            {
+                double factory_depot = _products[i].factory_depot;
+                c_depot->SetCoefficient(_factories_in_area[i][j],
+                                        factory_depot);
+            }
         }
     }
 
     // Power
-    MPConstraint* const power_con =
+    MPConstraint* const c_power_con =
         _solver->MakeRowConstraint(-infinity, _region.base_power);
     for (const auto& area : _areas)
     {
@@ -256,9 +204,13 @@ void Solver::declareConstraints()
             _facility_power.count("defense"))
             static_demand += area.area_facilities.at("defense") *
                              _facility_power.at("defense");
+        if (area.area_facilities.count("mining") &&
+            _facility_power.count("mining"))
+            static_demand += area.area_facilities.at("mining") *
+                             _facility_power.at("mining");
         if (static_demand > 0)
-            power_con->SetBounds(power_con->lb(),
-                                 power_con->ub() - static_demand);
+            c_power_con->SetBounds(c_power_con->lb(),
+                                   c_power_con->ub() - static_demand);
     }
     for (size_t i = 0; i < _products.size(); ++i)
     {
@@ -271,12 +223,12 @@ void Solver::declareConstraints()
         if (factory_power > 0)
         {
             for (size_t j = 0; j < _areas.size(); ++j)
-                power_con->SetCoefficient(_factories_in_area[i][j],
-                                          factory_power);
+                c_power_con->SetCoefficient(_factories_in_area[i][j],
+                                            factory_power);
         }
     }
     for (size_t i = 0; i < _fuels.size(); ++i)
-        power_con->SetCoefficient(_num_batteries_active[i], -_fuels[i].power);
+        c_power_con->SetCoefficient(_num_batteries_active[i], -_fuels[i].power);
 }
 
 bool Solver::solveModel()

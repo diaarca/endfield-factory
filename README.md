@@ -20,33 +20,21 @@ Valley IV for now).
 - $bp_r$: the base power provided in the region $r$
 - $s_r$: the per element storage in the region $r$
 
-#### The Product Related Data
-
-- $p$ $\in$ $P_r$: the products of the region $r$
-- $v_p$: the value of the product $p$ (in stock bills)
-- $o_p$: the quantity of originium needed for the product $p$
-- $a_p$: the quantity of amethyst needed for the product $p$
-- $f_p$: the quantity of ferrium needed for the product $p$
-- $t_p$: the production time needed for the product $p$
-- $d_p$: the depot length needed for the product $p$'s factory
-- $w_p$: the width length needed for the product $p$'s factory
-- $h_p$: the height length needed for the product $p$'s factory
-- $ps_p$: the number of protocol stash needed for the product $p$'s factory
-- $ru_p$: the number of refining unit needed for the product $p$'s factory
-- $su_p$: the number of shredding unit needed for the product $p$'s factory
-- $mu_p$: the number of moulding unit needed for the product $p$'s factory
-- $spu_p$: the number of seed picking unit needed for the product $p$'s factory
-- $plu_p$: the number of planting unit needed for the product $p$'s factory
-- $gu_p$: the number of gearing unit needed for the product $p$'s factory
-- $ftu_p$: the number of fitting unit needed for the product $p$'s factory
-- $flu_p$: the number of filling unit needed for the product $p$'s factory
-- $pku_p$: the number of packaging unit needed for the product $p$'s factory
-- $gu_p$: the number of grinding unit needed for the product $p$'s factory
-
 #### The Mineral Related Data
 
 - $m$ $\in$ $M_r$: the minerals of the region $r$
 - $l_m$: the limit of the mineral $m$ in the region
+
+#### The Product Related Data
+
+- $p$ $\in$ $P_r$: the products of the region $r$
+- $v_p$: the value of the product $p$ (in stock bills)
+- $m_p^m$: the quantity of mineral $m$ needed for the product $p$
+- $t_p$: the production time needed for the product $p$
+- $d_p$: the depot length needed for the product $p$'s factory
+- $w_p$: the width length needed for the product $p$'s factory
+- $h_p$: the height length needed for the product $p$'s factory
+- $fa_p^{fa}$: the number of facility $fa$ needed for the product $p$ factory
 
 #### The Fuel Related Data
 
@@ -57,9 +45,7 @@ Valley IV for now).
 #### The Area Related Data
 
 - $a$ $\in$ $A_r$: the areas of the region $r$
-- $z_a$: the maximum number of zipline in the area $a$
-- $d_a$: the maximum number of defenses in the area $a$
-- $m_a$: the number of mining rig needed in the area $a$
+- $fa_a^fa$: the number of facility $fa$ needed in area $a$
 - $w_a$: the PAC width in the area $a$
 - $h_a$: the PAC height in the area $a$
 - $wd_a$: the PAC depot width in the area $a$
@@ -85,7 +71,16 @@ $$\max{\left[\sum_{p\in P_r} \left(produce_p . v_p\right) - \sum_{fu\in FU_r} \l
 ### Constraints
 
 - $$produce_{fu} - \dfrac{60}{d_{fu}} . active_{fu} \geq 0 \quad \forall fu\in FU_r$$
-  (cannot consume more fuel that produced)
-- $$produce_{p} \leq \dfrac{s_r}{48 * 60} \forall p\in P_r\setminus FU_r$$ (we
-  don't want to fill the region storage within 48 hours)
-- $$$$
+  (cannot consume more fuel than produced)
+- $$produce_{p} \leq \dfrac{s_r}{48 * 60} \quad \forall p\in P_r\setminus FU_r$$
+  (we don't want to fill the region storage within 48 hours)
+- $$\sum_{p\in P_r} \left(produce_p . m_p^m \right) \leq l_m\quad \forall m\in M_r$$
+  (mineral limits)
+- $$produce_p - \sum_{a\in A_r}\left(factory_p^a . \dfrac{60}{t_p}\right)\leq 0\quad\forall p\in P_r$$
+  (fix the number of product factory based on its production)
+- $$\sum_{p\in P_r}\left(factory_p^a . w_p . h_p\right)\leq w_a . h_a\quad\forall a\in A_r$$
+  (product factory space constraint to stand in the area)
+- $$\sum_{p\in P_r}\left(factory_p^a . d_p\right)\leq wd_a + hd_a\quad\forall a\in A_r$$
+  (product factory depot lenght constraint to stand in the area)
+- $$\sum_{a\in A_r}\left(\sum_{fa\in FA_r}\left(fa_a^{fa} . p_{fa}\right) + \sum_{p\in P_r}\left(factory_p^a . \sum_{fa\in FA_r}\left(fa_p^{fa} . p_{fa}\right)\right)\right) - \sum{fu\in FU_r}\left(active_{fu} . p_{fu}\right)\leq bp_r$$
+  (power consumption constraint)
