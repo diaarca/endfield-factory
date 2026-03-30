@@ -5,9 +5,12 @@
 #include "Mineral.hpp"
 #include "Product.hpp"
 #include "Region.hpp"
-#include <ilcplex/ilocplex.h>
+#include "ortools/linear_solver/linear_solver.h"
+#include <memory>
 #include <string>
 #include <vector>
+
+using namespace operations_research;
 
 class Solver
 {
@@ -33,10 +36,8 @@ class Solver
     const std::map<std::string, double>& _facility_power;
     const Region& _region;
 
-    IloEnv _env;
-    IloModel _model;
-    IloNumVarArray _qty_produced;
-    IloArray<IloNumVarArray> _factories_in_area;
-    IloIntVarArray _num_batteries_active;
-    IloCplex _cplex;
+    std::unique_ptr<MPSolver> _solver;
+    std::vector<MPVariable*> _qty_produced;
+    std::vector<std::vector<MPVariable*>> _factories_in_area;
+    std::vector<MPVariable*> _num_batteries_active;
 };
