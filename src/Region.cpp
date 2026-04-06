@@ -5,7 +5,8 @@ Region Region::readCSV(const std::string& filename)
 {
     Region region;
     auto data = CSVObject::read_file(filename);
-    if (data.empty()) return region;
+    if (data.empty())
+        return region;
 
     for (size_t i = 1; i < data.size(); ++i)
     {

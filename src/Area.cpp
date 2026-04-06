@@ -7,7 +7,8 @@ std::vector<Area> Area::readCSV(const std::string& filename)
 {
     std::vector<Area> areas;
     auto data = CSVObject::read_file(filename);
-    if (data.empty()) return areas;
+    if (data.empty())
+        return areas;
 
     std::vector<std::string> header = data[0];
     int name_idx = -1, width_idx = -1, height_idx = -1, depot_w_idx = -1,
@@ -75,7 +76,8 @@ std::vector<Area> Area::readCSV(const std::string& filename)
 std::vector<std::string> Area::get_headers() const
 {
     std::vector<std::string> h = {"Area", "W", "H", "DW", "DH"};
-    for (auto const& [name, val] : area_facilities) {
+    for (auto const& [name, val] : area_facilities)
+    {
         h.push_back(name);
     }
     return h;
@@ -83,8 +85,11 @@ std::vector<std::string> Area::get_headers() const
 
 std::vector<std::string> Area::get_values() const
 {
-    std::vector<std::string> v = {name, std::to_string(pac_width), std::to_string(pac_height), std::to_string(pac_depot_width), std::to_string(pac_depot_height)};
-    for (auto const& [name, val] : area_facilities) {
+    std::vector<std::string> v = {
+        name, std::to_string(pac_width), std::to_string(pac_height),
+        std::to_string(pac_depot_width), std::to_string(pac_depot_height)};
+    for (auto const& [name, val] : area_facilities)
+    {
         v.push_back(std::to_string(val));
     }
     return v;

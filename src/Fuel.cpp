@@ -5,7 +5,8 @@ std::vector<Fuel> Fuel::readCSV(const std::string& filename)
 {
     std::vector<Fuel> fuels;
     auto data = CSVObject::read_file(filename);
-    if (data.empty()) return fuels;
+    if (data.empty())
+        return fuels;
 
     for (size_t i = 1; i < data.size(); ++i)
     {

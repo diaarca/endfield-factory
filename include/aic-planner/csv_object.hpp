@@ -1,10 +1,10 @@
 #pragma once
 
-#include "csv_reader.hpp"
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <map>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -42,23 +42,24 @@ class CSVObject
 
     // Generic function to display a table of any objects inheriting from
     // CSVObject
-    template <typename T> static void print_table(const std::vector<T>& objects)
+    template <typename T>
+    static void print_table(const std::vector<T>& objects,
+                            std::ostream& os = std::cout)
     {
         if (objects.empty())
             return;
 
-        // Use the first object to get the headers and title
         const CSVObject& first = static_cast<const CSVObject&>(objects[0]);
-        std::cout << "\n--- " << first.get_title() << " ---\n";
+        os << "\n--- " << first.get_title() << " ---\n";
         auto headers = first.get_headers();
 
         // Print header row
         for (const auto& h : headers)
         {
-            std::cout << std::left << std::setw(15)
-                      << (h.length() > 15 ? h.substr(0, 15) : h) << " | ";
+            os << std::left << std::setw(15)
+               << (h.length() > 15 ? h.substr(0, 15) : h) << " | ";
         }
-        std::cout << "\n" << std::string(headers.size() * 18, '-') << "\n";
+        os << "\n" << std::string(headers.size() * 18, '-') << "\n";
 
         // Print each object as a row
         for (const auto& obj : objects)
@@ -67,43 +68,10 @@ class CSVObject
             auto values = base_obj.get_values();
             for (const auto& v : values)
             {
-                std::cout << std::left << std::setw(15)
-                          << (v.length() > 15 ? v.substr(0, 15) : v) << " | ";
+                os << std::left << std::setw(15)
+                   << (v.length() > 15 ? v.substr(0, 15) : v) << " | ";
             }
-            std::cout << "\n";
-        }
-    }
-
-    // Generic function to write a collection of CSVObjects to a file
-    template <typename T>
-    static void write_table(const std::string& filename,
-                            const std::vector<T>& objects)
-    {
-        if (objects.empty())
-            return;
-
-        std::ofstream file(filename);
-        if (!file.is_open())
-            return;
-
-        const CSVObject& first = static_cast<const CSVObject&>(objects[0]);
-        auto headers = first.get_headers();
-
-        for (size_t i = 0; i < headers.size(); ++i)
-        {
-            file << headers[i] << (i == headers.size() - 1 ? "" : ",");
-        }
-        file << "\n";
-
-        for (const auto& obj : objects)
-        {
-            const CSVObject& base_obj = static_cast<const CSVObject&>(obj);
-            auto values = base_obj.get_values();
-            for (size_t i = 0; i < values.size(); ++i)
-            {
-                file << values[i] << (i == values.size() - 1 ? "" : ",");
-            }
-            file << "\n";
+            os << "\n";
         }
     }
 
@@ -120,8 +88,29 @@ class CSVObject
         std::string line;
         while (std::getline(file, line))
         {
-            rows.push_back(CSVReader::parse_line(line));
+            rows.push_back(parse_line(line));
         }
         return rows;
+    }
+
+  protected:
+    static std::vector<std::string> parse_line(const std::string& line)
+    {
+        std::vector<std::string> result;
+        std::stringstream ss(line);
+        std::string item;
+        while (std::getline(ss, item, ','))
+        {
+            const std::string whitespace = " \t\n\r";
+            size_t first = item.find_first_not_of(whitespace);
+            if (std::string::npos == first)
+            {
+                result.push_back("");
+                continue;
+            }
+            size_t last = item.find_last_not_of(whitespace);
+            result.push_back(item.substr(first, (last - first + 1)));
+        }
+        return result;
     }
 };

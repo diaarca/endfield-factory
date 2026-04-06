@@ -3,9 +3,9 @@
 #include "area.hpp"
 #include "fuel.hpp"
 #include "mineral.hpp"
+#include "ortools/linear_solver/linear_solver.h"
 #include "product.hpp"
 #include "region.hpp"
-#include "ortools/linear_solver/linear_solver.h"
 #include <memory>
 #include <string>
 #include <vector>

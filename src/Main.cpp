@@ -1,9 +1,9 @@
 #include "area.hpp"
-#include "mineral.hpp"
-#include "solver.hpp"
-#include "fuel.hpp"
 #include "facility.hpp"
+#include "fuel.hpp"
+#include "mineral.hpp"
 #include "region.hpp"
+#include "solver.hpp"
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -56,7 +56,8 @@ int main(int argc, char* argv[])
         // CSVObject::print_table(fuels);
 
         // Create solver and solve the model
-        Solver solver(products, mineral_limits, areas, fuels, facility_power, region);
+        Solver solver(products, mineral_limits, areas, fuels, facility_power,
+                      region);
         solver.solve();
     }
     catch (const std::exception& e)

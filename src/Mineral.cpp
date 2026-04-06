@@ -7,7 +7,8 @@ std::vector<Mineral> Mineral::readCSV(const std::string& filename)
 {
     std::vector<Mineral> minerals;
     auto data = CSVObject::read_file(filename);
-    if (data.empty()) return minerals;
+    if (data.empty())
+        return minerals;
 
     for (size_t i = 1; i < data.size(); ++i)
     {

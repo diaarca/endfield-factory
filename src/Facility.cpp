@@ -5,7 +5,8 @@ std::map<std::string, double> Facility::readCSV(const std::string& filename)
 {
     std::map<std::string, double> facilities;
     auto data = CSVObject::read_file(filename);
-    if (data.empty()) return facilities;
+    if (data.empty())
+        return facilities;
 
     for (size_t i = 1; i < data.size(); ++i)
     {

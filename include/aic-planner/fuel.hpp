@@ -1,8 +1,8 @@
 #pragma once
 
+#include "csv_object.hpp"
 #include <string>
 #include <vector>
-#include "csv_object.hpp"
 
 struct Fuel : public CSVObject
 {
