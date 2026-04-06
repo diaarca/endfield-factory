@@ -42,6 +42,13 @@ int main(int argc, char* argv[])
             return 1;
         }
 
+        // Mineral::print_table(mineral_limits);
+        // Product::print_table(products);
+        // Area::print_table(areas);
+        // Fuel::print_table(fuels);
+        // Facility::print_table(facility_power);
+        // Region::print_table(region);
+
         // Create solver and solve the model
         Solver solver(products, mineral_limits, areas, fuels, facility_power,
                       region);

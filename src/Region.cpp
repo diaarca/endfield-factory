@@ -1,5 +1,6 @@
 #include "region.hpp"
 #include <csv.h>
+#include <iomanip>
 #include <iostream>
 
 Region Region::readCSV(const std::string& filename)
@@ -29,4 +30,19 @@ Region Region::readCSV(const std::string& filename)
                   << e.what() << std::endl;
     }
     return region;
+}
+
+std::ostream& operator<<(std::ostream& os, const Region& r)
+{
+    os << "Region: Base Power: " << r.base_power << " | Storage: " << r.storage;
+    return os;
+}
+
+void Region::print_table(const Region& r)
+{
+    std::cout << "\n--- Region Info ---\n";
+    std::cout << std::left << std::setw(20) << "Base Power" << " | "
+              << r.base_power << "\n";
+    std::cout << std::left << std::setw(20) << "Storage" << " | " << r.storage
+              << "\n";
 }

@@ -1,5 +1,6 @@
 #include "product.hpp"
 #include <csv.h>
+#include <iomanip>
 #include <iostream>
 
 std::vector<Product>
@@ -66,4 +67,35 @@ Product::readCSV(const std::string& filename,
                   << e.what() << std::endl;
     }
     return products;
+}
+
+std::ostream& operator<<(std::ostream& os, const Product& p)
+{
+    os << "Product: " << std::left << std::setw(20) << p.name
+       << " | Value: " << p.value;
+    return os;
+}
+
+void Product::print_table(const std::vector<Product>& products)
+{
+    std::cout << "\n--- Products Table ---\n";
+    std::cout << std::left << std::setw(20) << "Product" << " | "
+              << std::setw(6) << "Val" << " | " << std::setw(6) << "Time"
+              << " | " << std::setw(4) << "Ori" << " | " << std::setw(4)
+              << "Ame" << " | " << std::setw(4) << "Fer" << " | "
+              << std::setw(6) << "W" << "x" << std::setw(6) << "H" << "\n";
+    std::cout << std::string(80, '-') << "\n";
+
+    for (const auto& p : products)
+    {
+        std::cout << std::left << std::setw(20) << p.name << " | "
+                  << std::setw(6) << p.value << " | " << std::setw(6)
+                  << p.production_time << " | " << std::setw(4)
+                  << p.mineral_consumption.at("originium") << " | "
+                  << std::setw(4) << p.mineral_consumption.at("amethyst")
+                  << " | " << std::setw(4)
+                  << p.mineral_consumption.at("ferrium") << " | "
+                  << std::setw(6) << p.factory_width << "x" << std::setw(6)
+                  << p.factory_height << "\n";
+    }
 }
