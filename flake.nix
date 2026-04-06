@@ -25,6 +25,7 @@
             or-tools
             gnumake
             clang
+            bear
           ];
 
           shellHook = ''
