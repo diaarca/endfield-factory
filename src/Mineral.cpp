@@ -6,36 +6,25 @@
 std::vector<Mineral> Mineral::readCSV(const std::string& filename)
 {
     std::vector<Mineral> minerals;
-    std::ifstream file(filename);
-    if (!file.is_open())
-    {
-        return minerals;
-    }
-    std::string line;
-    std::getline(file, line); // Skip header
+    auto data = CSVObject::read_file(filename);
+    if (data.empty()) return minerals;
 
-    while (std::getline(file, line))
+    for (size_t i = 1; i < data.size(); ++i)
     {
-        auto row = CSVReader::parse_line(line);
-        if (row.size() >= 2)
+        if (data[i].size() >= 2)
         {
-            minerals.push_back({row[0], std::stod(row[1])});
+            minerals.push_back({data[i][0], std::stod(data[i][1])});
         }
     }
     return minerals;
 }
 
-void Mineral::print_table(const std::vector<Mineral>& minerals)
+std::vector<std::string> Mineral::get_headers() const
 {
-    if (minerals.empty())
-        return;
-    std::cout << "\n--- Minerals ---\n";
-    std::cout << std::left << std::setw(15) << "Mineral" << " | "
-              << std::setw(8) << "Limit" << "\n";
-    std::cout << std::string(26, '-') << "\n";
-    for (const auto& mineral : minerals)
-    {
-        std::cout << std::left << std::setw(15) << mineral.name << " | "
-                  << std::setw(8) << mineral.limit << "\n";
-    }
+    return {"Mineral", "Limit"};
+}
+
+std::vector<std::string> Mineral::get_values() const
+{
+    return {name, std::to_string(limit)};
 }

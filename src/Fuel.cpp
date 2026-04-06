@@ -1,28 +1,32 @@
 #include "fuel.hpp"
-#include <fstream>
+#include <iostream>
 
 std::vector<Fuel> Fuel::readCSV(const std::string& filename)
 {
     std::vector<Fuel> fuels;
-    std::ifstream file(filename);
-    if (!file.is_open())
-    {
-        return fuels;
-    }
-    std::string line;
-    std::getline(file, line); // Skip header
+    auto data = CSVObject::read_file(filename);
+    if (data.empty()) return fuels;
 
-    while (std::getline(file, line))
+    for (size_t i = 1; i < data.size(); ++i)
     {
-        auto row = CSVReader::parse_line(line);
-        if (row.size() >= 3)
+        if (data[i].size() >= 3)
         {
             Fuel f;
-            f.name = row[0];
-            f.power = std::stod(row[1]);
-            f.duration = std::stod(row[2]);
+            f.name = data[i][0];
+            f.power = std::stod(data[i][1]);
+            f.duration = std::stod(data[i][2]);
             fuels.push_back(f);
         }
     }
     return fuels;
+}
+
+std::vector<std::string> Fuel::get_headers() const
+{
+    return {"Fuel", "Power", "Duration"};
+}
+
+std::vector<std::string> Fuel::get_values() const
+{
+    return {name, std::to_string(power), std::to_string(duration)};
 }

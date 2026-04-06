@@ -1,13 +1,13 @@
 #pragma once
 
-#include "csv_reader.hpp"
+#include "csv_object.hpp"
 #include "mineral.hpp"
 #include <map>
 #include <string>
 #include <vector>
 
 // Data structure for a product
-struct Product
+struct Product : public CSVObject
 {
     std::string name;
     double value;
@@ -23,6 +23,9 @@ struct Product
     static std::vector<Product>
     readCSV(const std::string& filename,
             const std::vector<Mineral>& mineral_limits);
-    static void print_table(const std::vector<Product>& products,
-                            const std::vector<Mineral>& mineral_limits);
+
+    // CSVObject implementation
+    std::string get_title() const override { return "Products"; }
+    std::vector<std::string> get_headers() const override;
+    std::vector<std::string> get_values() const override;
 };

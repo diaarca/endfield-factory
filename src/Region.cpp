@@ -1,36 +1,35 @@
 #include "region.hpp"
-#include "csv_reader.hpp"
-#include <fstream>
 #include <iostream>
-#include <vector>
 
 Region Region::readCSV(const std::string& filename)
 {
     Region region;
-    std::ifstream file(filename);
-    if (!file.is_open())
-    {
-        return region;
-    }
-    std::string line;
-    // Skip header
-    if (!std::getline(file, line))
-        return region;
+    auto data = CSVObject::read_file(filename);
+    if (data.empty()) return region;
 
-    while (std::getline(file, line))
+    for (size_t i = 1; i < data.size(); ++i)
     {
-        auto row = CSVReader::parse_line(line);
-        if (row.size() < 2)
+        if (data[i].size() < 2)
             continue;
 
-        if (row[0] == "base_power")
+        if (data[i][0] == "base_power")
         {
-            region.base_power = std::stod(row[1]);
+            region.base_power = std::stod(data[i][1]);
         }
-        else if (row[0] == "storage")
+        else if (data[i][0] == "storage")
         {
-            region.storage = std::stod(row[1]);
+            region.storage = std::stod(data[i][1]);
         }
     }
     return region;
+}
+
+std::vector<std::string> Region::get_headers() const
+{
+    return {"Base Power", "Storage"};
+}
+
+std::vector<std::string> Region::get_values() const
+{
+    return {std::to_string(base_power), std::to_string(storage)};
 }
