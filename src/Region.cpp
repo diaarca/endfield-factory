@@ -6,28 +6,20 @@
 Region Region::readCSV(const std::string& filename)
 {
     Region region;
-    try
+    io::CSVReader<2> in(filename);
+    in.read_header(io::ignore_extra_column, "information", "value");
+    std::string info;
+    double value;
+    while (in.read_row(info, value))
     {
-        io::CSVReader<2> in(filename);
-        in.read_header(io::ignore_extra_column, "information", "value");
-        std::string info;
-        double value;
-        while (in.read_row(info, value))
+        if (info == "base_power")
         {
-            if (info == "base_power")
-            {
-                region.base_power = value;
-            }
-            else if (info == "storage")
-            {
-                region.storage = value;
-            }
+            region.base_power = value;
         }
-    }
-    catch (const std::exception& e)
-    {
-        std::cerr << "Error reading region from " << filename << ": "
-                  << e.what() << std::endl;
+        else if (info == "storage")
+        {
+            region.storage = value;
+        }
     }
     return region;
 }
@@ -41,8 +33,8 @@ std::ostream& operator<<(std::ostream& os, const Region& r)
 void Region::print_table(const Region& r)
 {
     std::cout << "\n--- Region Info ---\n";
-    std::cout << std::left << std::setw(20) << "Base Power" << " | "
-              << r.base_power << "\n";
-    std::cout << std::left << std::setw(20) << "Storage" << " | " << r.storage
-              << "\n";
+    std::cout << std::left << std::setw(20) << "Base Power"
+              << " | " << r.base_power << "\n";
+    std::cout << std::left << std::setw(20) << "Storage"
+              << " | " << r.storage << "\n";
 }

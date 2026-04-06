@@ -6,21 +6,13 @@
 std::map<std::string, double> Facility::readCSV(const std::string& filename)
 {
     std::map<std::string, double> results;
-    try
+    io::CSVReader<2> in(filename);
+    in.read_header(io::ignore_extra_column, "facility", "power");
+    std::string name;
+    double power;
+    while (in.read_row(name, power))
     {
-        io::CSVReader<2> in(filename);
-        in.read_header(io::ignore_extra_column, "facility", "power");
-        std::string name;
-        double power;
-        while (in.read_row(name, power))
-        {
-            results[name] = power;
-        }
-    }
-    catch (const std::exception& e)
-    {
-        std::cerr << "Error reading facilities from " << filename << ": "
-                  << e.what() << std::endl;
+        results[name] = power;
     }
     return results;
 }
@@ -35,8 +27,8 @@ std::ostream& operator<<(std::ostream& os, const Facility& f)
 void Facility::print_table(const std::map<std::string, double>& facilities)
 {
     std::cout << "\n--- Facilities Table ---\n";
-    std::cout << std::left << std::setw(25) << "Facility" << " | "
-              << std::setw(10) << "Power" << "\n";
+    std::cout << std::left << std::setw(25) << "Facility"
+              << " | " << std::setw(10) << "Power" << "\n";
     std::cout << std::string(40, '-') << "\n";
 
     for (const auto& [name, power] : facilities)

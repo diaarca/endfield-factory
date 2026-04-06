@@ -4,7 +4,6 @@
 #include "mineral.hpp"
 #include "region.hpp"
 #include "solver.hpp"
-#include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -20,43 +19,37 @@ int main(int argc, char* argv[])
 
     try
     {
-        // Read data
+        // read data
+        std::string region_file = folder_path + "/region.csv";
         std::string minerals_file = folder_path + "/minerals.csv";
         std::string products_file = folder_path + "/products.csv";
         std::string areas_file = folder_path + "/areas.csv";
         std::string fuels_file = folder_path + "/fuels.csv";
         std::string facilities_file = folder_path + "/facilities.csv";
-        std::string region_file = folder_path + "/region.csv";
 
-        auto mineral_limits = Mineral::readCSV(minerals_file);
-        auto products = Product::readCSV(products_file, mineral_limits);
-        auto areas = Area::readCSV(areas_file);
-        auto fuels = Fuel::readCSV(fuels_file);
-        auto facility_power = Facility::readCSV(facilities_file);
-        auto region = Region::readCSV(region_file);
+        Region region = Region::readCSV(region_file);
+        std::vector<Mineral> minerals = Mineral::readCSV(minerals_file);
+        std::vector<Product> products =
+            Product::readCSV(products_file, minerals);
+        std::vector<Area> areas = Area::readCSV(areas_file);
+        std::vector<Fuel> fuels = Fuel::readCSV(fuels_file);
+        std::map<std::string, double> facilities =
+            Facility::readCSV(facilities_file);
 
-        if (products.empty() || mineral_limits.empty())
+        if (minerals.empty() || products.empty() || areas.empty() ||
+            fuels.empty() || facilities.empty())
         {
-            std::cerr << "Data files are empty or could not be read properly."
-                      << std::endl;
-            return 1;
+            throw std::runtime_error(
+                "Essential data (products or minerals) is missing or empty.");
         }
 
-        // Mineral::print_table(mineral_limits);
-        // Product::print_table(products);
-        // Area::print_table(areas);
-        // Fuel::print_table(fuels);
-        // Facility::print_table(facility_power);
-        // Region::print_table(region);
-
-        // Create solver and solve the model
-        Solver solver(products, mineral_limits, areas, fuels, facility_power,
-                      region);
+        // instanciate and solve the model
+        Solver solver(products, minerals, areas, fuels, facilities, region);
         solver.solve();
     }
     catch (const std::exception& e)
     {
-        std::cerr << "\nAn error occurred: " << e.what() << std::endl;
+        std::cerr << "\nFATAL ERROR: " << e.what() << std::endl;
         return 1;
     }
 

@@ -6,21 +6,13 @@
 std::vector<Mineral> Mineral::readCSV(const std::string& filename)
 {
     std::vector<Mineral> minerals;
-    try
+    io::CSVReader<2> in(filename);
+    in.read_header(io::ignore_extra_column, "mineral", "limit");
+    std::string name;
+    double limit;
+    while (in.read_row(name, limit))
     {
-        io::CSVReader<2> in(filename);
-        in.read_header(io::ignore_extra_column, "mineral", "limit");
-        std::string name;
-        double limit;
-        while (in.read_row(name, limit))
-        {
-            minerals.emplace_back(name, limit);
-        }
-    }
-    catch (const std::exception& e)
-    {
-        std::cerr << "Error reading minerals from " << filename << ": "
-                  << e.what() << std::endl;
+        minerals.emplace_back(name, limit);
     }
     return minerals;
 }
@@ -35,8 +27,8 @@ std::ostream& operator<<(std::ostream& os, const Mineral& m)
 void Mineral::print_table(const std::vector<Mineral>& minerals)
 {
     std::cout << "\n--- Minerals Table ---\n";
-    std::cout << std::left << std::setw(20) << "Mineral" << " | "
-              << std::setw(10) << "Limit" << "\n";
+    std::cout << std::left << std::setw(20) << "Mineral"
+              << " | " << std::setw(10) << "Limit" << "\n";
     std::cout << std::string(35, '-') << "\n";
 
     for (const auto& m : minerals)
