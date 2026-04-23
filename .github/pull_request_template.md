@@ -13,11 +13,9 @@ Fixes # (issue)
 Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce.
 
 - [ ] Test A: Run solver on `data/valley_iv`
-- [ ] Test B: Verify output optimality
 
 ## Checklist:
 - [ ] My code follows the style guidelines of this project
 - [ ] I have performed a self-review of my own code
 - [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] My changes generate no new warnings
-- [ ] New and existing unit tests pass locally with my changes
