@@ -8,17 +8,6 @@ set(PLANNER_LIB_SOURCES
     solver.cpp
 )
 
-add_library(aic_planner_lib STATIC ${PLANNER_LIB_SOURCES})
-
-target_include_directories(aic_planner_lib PUBLIC
-    "${PROJECT_SOURCE_DIR}/include/aic-planner"
-)
-
-target_link_libraries(aic_planner_lib PUBLIC
-    ortools::ortools
-    FastCppCsvParser::FastCppCsvParser
-)
-
 find_package(ortools REQUIRED)
 
 find_path(FastCppCsvParser_INCLUDE_DIR
@@ -41,6 +30,17 @@ if(FastCppCsvParser_FOUND)
         )
     endif()
 endif()
+
+add_library(aic_planner_lib STATIC ${PLANNER_LIB_SOURCES})
+
+target_include_directories(aic_planner_lib PUBLIC
+    "${PROJECT_SOURCE_DIR}/include/aic-planner"
+)
+
+target_link_libraries(aic_planner_lib PUBLIC
+    ortools::ortools
+    FastCppCsvParser::FastCppCsvParser
+)
 
 add_executable(aic_planner main.cpp)
 
