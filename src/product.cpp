@@ -4,8 +4,7 @@
 #include <iostream>
 
 std::vector<Product>
-Product::readCSV(const std::string& filename,
-                 const std::vector<Mineral>& mineral_limits)
+Product::readCSV(const std::string& filename)
 {
     std::vector<Product> products;
     io::CSVReader<22> in(filename);

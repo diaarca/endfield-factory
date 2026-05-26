@@ -29,8 +29,7 @@ int main(int argc, char* argv[])
 
         Region region = Region::readCSV(region_file);
         std::vector<Mineral> minerals = Mineral::readCSV(minerals_file);
-        std::vector<Product> products =
-            Product::readCSV(products_file, minerals);
+        std::vector<Product> products = Product::readCSV(products_file);
         std::vector<Area> areas = Area::readCSV(areas_file);
         std::vector<Fuel> fuels = Fuel::readCSV(fuels_file);
         std::map<std::string, double> facilities =
