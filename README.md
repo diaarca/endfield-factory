@@ -59,3 +59,5 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for set
 
 ## License
 This project is licensed under the **MIT License** - see our [LICENSE](LICENSE) file for details.
+
+**Arknights: Endfield** and its assests are the property of **GRYPHLINE. GRYPH FRONTIER PTELTD**, and this project claims no rights over the original game.
