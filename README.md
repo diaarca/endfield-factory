@@ -20,16 +20,24 @@ From the project root, run:
 nix develop
 ```
 
-### 2. Compile
-Once inside the Nix shell, run:
+### 2. Configurate the project
 ```bash
-make
+configure
 ```
 
-### 3. Usage
+### 3. Build the project
+```
+build
+```
+
+### 4. Usage
 The executable is located in `build/bin/`. Run it by providing a path to a region's data folder:
 ```bash
 ./build/bin/aic_planner data/valley_iv
+```
+or by running the `run` command:
+```bash
+run data/valley_iv
 ```
 
 ---
@@ -49,10 +57,10 @@ The solver expects a directory containing the following CSV files:
 
 We are actively working to improve the AIC Planner. Here is our wishlist for future features:
 
-- **Build System Migration** ([#6](https://github.com/diaarca/aic-planner/issues/6)): Transition from `Make` to `CMake` to improve project maintainability and cross-platform compatibility.
 - **Wuling Region Support** ([#7](https://github.com/diaarca/aic-planner/issues/7)): Add full support for the `Wulling` region, including data files and specific in-game logic.
 - **Dynamic Facility Logic** ([#8](https://github.com/diaarca/aic-planner/issues/8)): Shift from blueprint-based data to a facility-logic-based engine. This allows the solver to analyze individual facility attributes (size, recipes, inputs/outputs) to autonomously decide on the most profitable products and optimal placements.
 - **Solution Visualizer** ([#9](https://github.com/diaarca/aic-planner/issues/9)): Create a visual representation of the solver's output to help players build the optimized factory layout in-game.
+- **Nix Package Conversion** ([#14](https://github.com/diaarca/aic-planner/issues/14)): Convert the project to a Nix package to improve reproducibility and portability.
 
 ## Contributing
 Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community guidelines.

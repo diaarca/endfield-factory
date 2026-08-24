@@ -2,7 +2,7 @@
   description = "Development environment for AIC Planner";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -48,26 +48,24 @@
       in
       {
         devShells.default = pkgs.mkShell {
-          buildInputs = with pkgs; [
-            # dependencies
+          nativeBuildInputs = with pkgs; [
             cmake
             pkg-config
-            clp
-            or-tools
             gnumake
             clang
+          ];
+
+          buildInputs = with pkgs; [
+            # dependencies
+            or-tools
             fast-cpp-csv-parser
+            re2
             zlib
             bzip2
-            abseil-cpp
-            protobuf
-            re2
             clp
             cbc
             glpk
-            highs
             eigen
-            scip
 
             # custom commands
             configure
