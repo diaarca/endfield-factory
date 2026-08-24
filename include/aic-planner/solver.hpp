@@ -3,15 +3,13 @@
 #include "area.hpp"
 #include "fuel.hpp"
 #include "mineral.hpp"
-#include "ortools/linear_solver/linear_solver.h"
+#include "ortools/sat/cp_model.h"
 #include "product.hpp"
 #include "region.hpp"
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
-
-using namespace operations_research;
 
 class Solver
 {
@@ -37,8 +35,10 @@ class Solver
     const std::map<std::string, double>& _facility_power;
     const Region& _region;
 
-    std::unique_ptr<MPSolver> _solver;
-    std::vector<MPVariable*> _qty_produced;
-    std::vector<std::vector<MPVariable*>> _factories_in_area;
-    std::vector<MPVariable*> _num_batteries_active;
+    operations_research::sat::CpModelBuilder _cp_model;
+    operations_research::sat::CpSolverResponse _response;
+    std::vector<operations_research::sat::IntVar> _qty_produced;
+    std::vector<std::vector<operations_research::sat::IntVar>> _factories_in_area;
+    std::vector<operations_research::sat::IntVar> _num_batteries_active;
+    int64_t _obj_scale_factor;
 };
