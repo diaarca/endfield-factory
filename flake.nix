@@ -59,6 +59,7 @@
             # dependencies
             or-tools
             fast-cpp-csv-parser
+            protobuf
             re2
             zlib
             bzip2
