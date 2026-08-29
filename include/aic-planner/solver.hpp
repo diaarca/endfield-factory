@@ -11,6 +11,8 @@
 #include <string>
 #include <vector>
 
+#define NB_HOUR_BEFORE_OVERFLOW 48
+
 class Solver
 {
   public:
@@ -38,7 +40,8 @@ class Solver
     operations_research::sat::CpModelBuilder _cp_model;
     operations_research::sat::CpSolverResponse _response;
     std::vector<operations_research::sat::IntVar> _qty_produced;
-    std::vector<std::vector<operations_research::sat::IntVar>> _factories_in_area;
+    std::vector<std::vector<operations_research::sat::IntVar>>
+        _factories_in_area;
     std::vector<operations_research::sat::IntVar> _num_batteries_active;
     int64_t _obj_scale_factor;
 };

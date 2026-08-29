@@ -30,7 +30,8 @@ void Fuel::print_table(const std::vector<Fuel>& fuels)
     std::cout << "\n--- Fuels Table ---\n";
     std::cout << std::left << std::setw(20) << "Fuel"
               << " | " << std::setw(10) << "Power"
-              << " | " << std::setw(10) << "Duration" << "\n";
+              << " | " << std::setw(10) << "Duration"
+              << "\n";
     std::cout << std::string(50, '-') << "\n";
 
     for (const auto& f : fuels)

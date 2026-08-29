@@ -28,7 +28,8 @@ void Mineral::print_table(const std::vector<Mineral>& minerals)
 {
     std::cout << "\n--- Minerals Table ---\n";
     std::cout << std::left << std::setw(20) << "Mineral"
-              << " | " << std::setw(10) << "Limit" << "\n";
+              << " | " << std::setw(10) << "Limit"
+              << "\n";
     std::cout << std::string(35, '-') << "\n";
 
     for (const auto& m : minerals)
