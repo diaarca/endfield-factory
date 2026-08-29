@@ -3,8 +3,7 @@
 #include <iomanip>
 #include <iostream>
 
-std::vector<Product>
-Product::readCSV(const std::string& filename)
+std::vector<Product> Product::readCSV(const std::string& filename)
 {
     std::vector<Product> products;
     io::CSVReader<22> in(filename);
@@ -73,7 +72,8 @@ void Product::print_table(const std::vector<Product>& products)
               << " | " << std::setw(4) << "Ori"
               << " | " << std::setw(4) << "Ame"
               << " | " << std::setw(4) << "Fer"
-              << " | " << std::setw(6) << "W" << "x" << std::setw(6) << "H"
+              << " | " << std::setw(6) << "W"
+              << "x" << std::setw(6) << "H"
               << "\n";
     std::cout << std::string(80, '-') << "\n";
 

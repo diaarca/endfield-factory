@@ -28,7 +28,8 @@ void Facility::print_table(const std::map<std::string, double>& facilities)
 {
     std::cout << "\n--- Facilities Table ---\n";
     std::cout << std::left << std::setw(25) << "Facility"
-              << " | " << std::setw(10) << "Power" << "\n";
+              << " | " << std::setw(10) << "Power"
+              << "\n";
     std::cout << std::string(40, '-') << "\n";
 
     for (const auto& [name, power] : facilities)
